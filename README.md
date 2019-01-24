@@ -12,7 +12,7 @@ oemdlRtools
 
 `oemdlRtools` is an R package to import data from an [Oxford Economics](http://oxfordeconomics.com/) [Global Economic Model](https://www.oxfordeconomics.com/global-economic-model) database file (`.db`) into an R data frame. It relies on the [Oxford Economics Mdl tool](http://tools.oxfordeconomics.com/mdl/downloads.aspx) to generate a `.csv` file, which is then imported into R and transformed into a format suitable for data analysis.
 
-Note that the package is still considered work-in-progress and comes no warranty. Comments, suggestions or patches are welcome!
+Note that the package is still considered work-in-progress and comes with no warranty. Comments, suggestions or patches are welcome!
 
 Installation
 ============
