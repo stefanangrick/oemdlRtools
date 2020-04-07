@@ -2,16 +2,16 @@
 % Please edit documentation in R/oemdlRtools.R
 \name{oe_macromappings}
 \alias{oe_macromappings}
-\title{Return Oxford Economics location identifiers and corresponding ISO codes}
+\title{Return Oxford Economics sector names and corresponding ISO codes}
 \usage{
 oe_macromappings()
 }
 \value{
-Returns a data frame containing Oxford Economics location identifiers
-        and corresponding ISO 3-character code.
+Data frame containing Oxford Economics sector names and corresponding
+ISO 3-character code.
 }
 \description{
-Returns a data frame containing Oxford Economics location identifiers and
+Returns a data frame containing Oxford Economics sector names and
 corresponding ISO 3-character code.
 }
 \examples{

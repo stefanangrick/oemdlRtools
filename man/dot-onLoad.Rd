@@ -2,10 +2,10 @@
 % Please edit documentation in R/oemdlRtools.R
 \name{.onLoad}
 \alias{.onLoad}
-\title{Check for availability of Mdl tool on load}
+\title{Check if Mdl is available on load}
 \usage{
 .onLoad(libname, pkgname)
 }
 \description{
-Check for availability of Mdl tool on load
+Check if Mdl is available on load
 }

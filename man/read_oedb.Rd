@@ -4,40 +4,63 @@
 \alias{read_oedb}
 \title{Read Oxford Economics Global Economic Model database files}
 \usage{
-read_oedb(db, md = "C:/OEF", sy = 1980, ey = 2050, id = NULL,
-  tp = "V")
+read_oedb(
+  db,
+  mnemonic = NULL,
+  sector = NULL,
+  mnemonic_sector = NULL,
+  exp_type = "V",
+  model_dir = "C:/OEF",
+  start_year = 1980,
+  end_year = 2050,
+  as_xts = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{db}{A filename.}
+\item{db}{Character. Filename of or path to the database file.}
 
-\item{md}{Model directory (default: C:/OEF).}
+\item{mnemonic}{Character or character vector. Mnemonics (variable names) to 
+import.}
 
-\item{sy}{The first year for which data should be exported (default: 1980).}
+\item{sector}{Character or character vector. Sectors (country names) to
+import.}
 
-\item{ey}{The last year for which data should be exported (default: 2050).}
+\item{mnemonic_sector}{Data frame with two columns, "Mnemonic" and "Sector".
+These specify custom mnemonic-sector combinations.}
 
-\item{id}{A vector of variable identifiers to be exported (optional).
-Variable identifiers are made up of variable names and location names,
-separated by a comma. If omitted, all variables will be imported.}
+\item{exp_type}{Character or character vector. Type of values to be imported:
+\code{"V"} for variable data (default), \code{"R"} for residual data, or
+\code{c("V", "R")} for both.}
 
-\item{tp}{Type of values to be exported: (\code{V}) for variable data
-(default), \code{R} for residual data.}
+\item{model_dir}{Character. Path to model directory (default: C:/OEF).}
+
+\item{start_year}{Numeric. The first year for which to import data (default:
+1980).}
+
+\item{end_year}{Numeric. The last year for which to import data (default:
+2050).}
+
+\item{as_xts}{Logical. If \code{TRUE}, data is returned in xts format.}
+
+\item{verbose}{Logical. If \code{TRUE}, status messages are printed.}
 }
 \value{
-A list containing the data frame (\code{$df}), basic meta data
-(\code{$meta}), and a vector of dates giving the last data point with
-historical data (\code{$lasthistory})
+A list containing the data \code{$dat}, header metadata
+\code{$dat_head}, fix metadata \code{$fix}, variable metadata \code{$var}
+(including a logical value \code{$var$Is.percent} indicating if a variable is
+a percentage value, and a character value \code{$var$Residual.Indicator}
+listing the residual name corresponding to a specific variable), a character
+vector \code{$type} storing the type of data that has been imported (variable
+or residual data), and numeric values \code{$last_hist} and
+\code{$first_fcst} specifying the index values of the last historical data
+point and the first forecast data point respectively. Note that mnemonics are
+converted to syntactically valid R names and that an "R_" prefix is added to
+names of columns containing residual data.
 }
 \description{
-Reads an Oxford Economics Global Economic Model database file (.db) into a
-data frame.
-}
-\examples{
-setwd("C:/OEF/")
-ids <- c("GDPHEADPPP!,US", "GDPHEADPPP!,GERMANY", "GDPHEADPPP!,UK",
-          "GDPHEADPPP!,JAPAN", "GDPHEADPPP!,KOREA")
-dat <- read_oedb("Jan19.db", "C:/OEF", 1990, 2020, ids, "V")$df
-head(dat)
+Imports data from an Oxford Economics Global Economic Model database file
+(.db) into R.
 }
 \seealso{
 \code{\link{oe_macromappings}}
