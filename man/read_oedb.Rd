@@ -20,7 +20,7 @@ read_oedb(
 \arguments{
 \item{db}{Character. Filename of or path to the database file.}
 
-\item{mnemonic}{Character or character vector. Mnemonics (variable names) to 
+\item{mnemonic}{Character or character vector. Mnemonics (variable names) to
 import.}
 
 \item{sector}{Character or character vector. Sectors (country names) to
