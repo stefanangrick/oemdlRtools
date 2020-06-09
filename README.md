@@ -15,7 +15,7 @@ Note that the package requires a working installation of the [Oxford
 Economics Global Model
 Workstation](https://www.oxfordeconomics.com/my-oxford/global-economic-model)
 and the [Oxford Economics Mdl
-tool](http://tools.oxfordeconomics.com/mdl/downloads.aspx). Mdl needs to
+tool](https://tools.oxfordeconomics.com/mdl/downloads.aspx). Mdl needs to
 be present in the system’s user path variable, which is the case if Mdl
 has been installed using the [.msi installer
 package](http://tools.oxfordeconomics.com/mdl/downloads.aspx). Users may
