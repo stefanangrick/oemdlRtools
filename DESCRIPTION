@@ -1,13 +1,13 @@
 Package: oemdlRtools
 Type: Package
 Title: oemdlRtools
-Version: 0.9.0.1
-Date: 2020-04-09
+Version: 0.9.0.2
+Date: 2020-06-24
 Authors@R: person("Stefan", "Angrick", email = "contact@stefanangrick.net",
                   role = c("aut", "cre"))
 Depends:
     R (>= 3.1.0)
-Description: Import data from an Oxford Economics model database
+Description: Import data from an Oxford Economics model database.
 License: MIT + file LICENSE
 LazyData: TRUE
 Suggests:

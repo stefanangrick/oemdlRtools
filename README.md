@@ -5,9 +5,9 @@ oemdlRtools
 Economics](http://oxfordeconomics.com/) [Global Economic
 Model](https://www.oxfordeconomics.com/global-economic-model) database
 file (`.db`) into an R data frame. It relies on the [Oxford Economics
-Mdl tool](http://tools.oxfordeconomics.com/mdl/downloads.aspx) to
-generate a `.csv` file, which is then imported into R and transformed
-into a format suitable for data analysis.
+Mdl tool](https://tools.oxfordeconomics.com/mdl/downloads.aspx) to
+generate a temporary `.csv` file, which is then imported into R and
+transformed into a format suitable for data analysis.
 
 # Setup
 
@@ -15,12 +15,12 @@ Note that the package requires a working installation of the [Oxford
 Economics Global Model
 Workstation](https://www.oxfordeconomics.com/my-oxford/global-economic-model)
 and the [Oxford Economics Mdl
-tool](https://tools.oxfordeconomics.com/mdl/downloads.aspx). Mdl needs to
-be present in the system’s user path variable, which is the case if Mdl
-has been installed using the [.msi installer
-package](http://tools.oxfordeconomics.com/mdl/downloads.aspx). Users may
-run `cmd.exe` and type `echo %PATH%` to confirm that Mdl is present in
-the user path variable.
+tool](https://tools.oxfordeconomics.com/mdl/downloads.aspx). Mdl needs
+to be present in the system’s user path variable, which is the case if
+Mdl has been installed using the [.msi installer
+package](https://tools.oxfordeconomics.com/mdl/downloads.aspx). Users
+may run `cmd.exe` and type `echo %PATH%` to confirm that Mdl is present
+in the user path variable.
 
 Once Mdl has been installed, install the R package by running these
 commands:
@@ -137,7 +137,7 @@ hidden function `.revert_names()`.
 
 To import data from an Oxford Economics [Global Industry
 Model](https://www.oxfordeconomics.com/my-oxford/global-industry-model)
-database, set the `model_dir` parameter to your industry model
+database, simply set the `model_dir` parameter to your industry model
 directory:
 
 ``` r

@@ -4,10 +4,6 @@
   if (Sys.which("mdl") == "") {
     warning("This package requires the Oxford Economics Mdl tool to run.")
   }
-
-  if (system("mdl", ignore.stdout = TRUE, ignore.stderr = TRUE) != 1) {
-    warning("This package requires the Oxford Economics Mdl tool to run.")
-  }
 }
 
 #' Turn identifiers into syntactically valid R names
@@ -198,8 +194,8 @@ oe_macromappings <- function() {
                c("AR_LATCA", "LATCA"),
                c("AR_ME", "ME"),
                c("AR_AFR", "RAF"))
-  tab <- setNames(data.frame(tab, stringsAsFactors = FALSE),
-                  nm = c("oesector", "iso3c"))
+  tab <- stats::setNames(data.frame(tab, stringsAsFactors = FALSE),
+                         nm = c("oesector", "iso3c"))
   return(tab)
 }
 
@@ -247,10 +243,6 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
     stop("This function requires the Oxford Economics Mdl tool to run.")
   }
 
-  if (system("mdl", ignore.stdout = TRUE, ignore.stderr = TRUE) != 1) {
-    stop("This function requires the Oxford Economics Mdl tool to run.")
-  }
-
   # Check if database file exists
   if (!file.exists(db)) {
     stop("Database file not found.")
@@ -263,7 +255,7 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
       mnemonic_sector$Mnemonic <- .clean_names(mnemonic_sector$Mnemonic)
     } else {
       warning("mnemonic_sector must be a data frame with two columns: ",
-      "'Mnemonic', and 'Sector'.")
+              "'Mnemonic', and 'Sector'.")
       mnemonic_sector <- NULL
     }
   }
@@ -291,8 +283,8 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
   fix_dat <- NULL
 
   fix_file <- paste0(tempfile(tmpdir = tempdir()), "fix.csv")
-  mdl_fix_call <- paste0("mdl export-entities -d ", db, " -m ", model_dir,
-                         " -o ", fix_file, " -e fixes")
+  mdl_fix_call <- paste0("mdl export-entities -d \"", db, "\" -m \"", model_dir,
+                         "\" -o \"", fix_file, "\" -e fixes")
 
   if (verbose) {
     message(paste0("Running Mdl to export fix metadata: ", mdl_fix_call))
@@ -302,8 +294,9 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
     stop("Mdl tool returned an error.")
   }
 
-  fix_dat             <- read.csv(fix_file, header = TRUE,
-                                  stringsAsFactors = FALSE, na.strings = "")
+  fix_dat             <- utils::read.csv(fix_file, header = TRUE,
+                                         stringsAsFactors = FALSE,
+                                         na.strings = "")
   fix_dat             <- fix_dat[(fix_dat$Sector != "#ERROR"), ]
   fix_dat             <- fix_dat[(!is.na(fix_dat$Mnemonic)), ]
   fix_dat$Mnemonic    <- .clean_names(fix_dat$Mnemonic)
@@ -317,8 +310,8 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
   var_dat <- NULL
 
   var_file <- paste0(tempfile(tmpdir = tempdir()), "var.csv")
-  mdl_var_call <- paste0("mdl export-entities -d ", db, " -m ", model_dir,
-                         " -o ", var_file, " -e variables")
+  mdl_var_call <- paste0("mdl export-entities -d \"", db, "\" -m \"", model_dir,
+                         "\" -o \"", var_file, "\" -e variables")
 
   if (verbose) {
     message(paste0("Running Mdl to export variable metadata: ", mdl_var_call))
@@ -328,8 +321,9 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
     stop("Mdl tool returned an error.")
   }
 
-  var_dat                <- read.csv(var_file, header = TRUE,
-                                     stringsAsFactors = FALSE, na.strings = "")
+  var_dat                <- utils::read.csv(var_file, header = TRUE,
+                                            stringsAsFactors = FALSE,
+                                            na.strings = "")
   var_dat$Mnemonic       <- .clean_names(var_dat$Mnemonic)
   var_dat$Indicator      <- paste0(var_dat$Mnemonic, "_", var_dat$Sector)
   var_dat$End.of.History <- .oe_date(var_dat$End.of.History)
@@ -342,9 +336,9 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
 
   # Export actual data and read in data
   dat_file <- paste0(tempfile(tmpdir = tempdir()), "dat.csv")
-  mdl_dat_call <- paste0("mdl export -d ", db, " -m ", model_dir, " -y ",
-                         start_year, " -e ", end_year, " -o ", dat_file,
-                         " -f Classic_v")
+  mdl_dat_call <- paste0("mdl export -d \"", db, "\" -m \"", model_dir,
+                         "\" -y ", start_year, " -e ", end_year, " -o \"",
+                         dat_file, "\" -f Classic_v")
 
   # If mnemonics and/or sectors and/or mnemonics_sectors have been supplied, use
   # that information to build sel file
@@ -430,7 +424,7 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
     write(sel_content, file = sel_file)
 
     # Append command to use SEL file to system call
-    mdl_dat_call <- paste0(mdl_dat_call, " -s ", sel_file)
+    mdl_dat_call <- paste0(mdl_dat_call, " -s \"", sel_file, "\"")
 
     # Overwrite main variable and fix metadata
     var_dat <- var_dat_subset
@@ -447,8 +441,8 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
   }
 
   # Load data into R
-  dat <- read.csv(dat_file, header = FALSE, stringsAsFactors = FALSE,
-                  na.strings = "")
+  dat <- utils::read.csv(dat_file, header = FALSE, stringsAsFactors = FALSE,
+                         na.strings = "")
 
   # Create column names (format: Indicator_Location)
   type_row     <- which(trimws(dat[, 1]) == "L") - 1
@@ -486,14 +480,14 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
 
   # Save type of variable
   dat_type <- trimws(dat_head[type_row, ])
-  dat_type <- setNames(dat_type, nm = colnames(dat[, -1]))
+  dat_type <- stats::setNames(dat_type, nm = colnames(dat[, -1]))
 
   # Save index of last historical data point
   last_hist <- trimws(dat_head[date_row, ])
   last_hist <- replace(last_hist, last_hist == "0", NA)
   last_hist <- .oe_date(last_hist)
   last_hist <- match(last_hist, dat$date, nomatch = NA)
-  last_hist <- setNames(last_hist, nm = colnames(dat[, -1]))
+  last_hist <- stats::setNames(last_hist, nm = colnames(dat[, -1]))
 
   # Save index of first forecast data point
   first_fcst <- last_hist + 1
