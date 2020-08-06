@@ -101,7 +101,7 @@ terms, create the following data frame:
 
 ``` r
 mn_sec <- data.frame("Mnemonic" = c("GDP!", "BCU%", "BVI$"),
-                     "Sector" = c("US", "JAPAN", "WORLD"),
+                     "Sector" = c("US", "JAPAN", "KOREA"),
                      stringsAsFactors = FALSE)
 mn_sec
 ```
@@ -109,7 +109,7 @@ mn_sec
     ##   Mnemonic Sector
     ## 1     GDP!     US
     ## 2     BCU%  JAPAN
-    ## 3     BVI$  WORLD
+    ## 3     BVI$  KOREA
 
 Now run:
 
@@ -119,13 +119,13 @@ ex04 <- read_oedb(db = "Jan20_1.db", mnemonic_sector = mn_sec,
 head(ex04$dat)
 ```
 
-    ##         date GDPexc_US BCUpct_JAPAN BVIusd_WORLD
-    ## 1 2000-01-01  2500.725     2.646024     4518.655
-    ## 2 2000-04-01  2561.925     2.859763     1941.923
-    ## 3 2000-07-01  2579.950     2.846237      168.355
-    ## 4 2000-10-01  2609.750     2.319407   -16279.750
-    ## 5 2001-01-01  2618.225     2.177327    -9249.701
-    ## 6 2001-04-01  2649.450     1.672319   -15984.562
+    ##         date GDPexc_US BCUpct_JAPAN BVIusd_KOREA
+    ## 1 2000-01-01  2500.725     2.646024       3553.2
+    ## 2 2000-04-01  2561.925     2.859763       3395.9
+    ## 3 2000-07-01  2579.950     2.846237       5397.3
+    ## 4 2000-10-01  2609.750     2.319407       3046.0
+    ## 5 2001-01-01  2618.225     2.177327       3099.9
+    ## 6 2001-04-01  2649.450     1.672319       2975.1
 
 Note that in addition to the actual data (`$dat`), the function returns
 fix metadata (`$fix`) and general variable information (`$var`). By

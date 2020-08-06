@@ -1,0 +1,126 @@
+---
+title: "oemdlRtools"
+output:
+  github_document:
+    fig_width: 8
+    fig_height: 4
+    dev: png
+---
+
+```{r housekeeping, include=FALSE}
+knitr::opts_knit$set(root.dir = "C:/OEF/OEMDLRTOOLS")
+Sys.setenv(TZ = "Europe/London")
+options(tz = "Europe/London")
+```
+
+`oemdlRtools` is an R package to import data from an [Oxford Economics](http://oxfordeconomics.com/) [Global Economic Model](https://www.oxfordeconomics.com/global-economic-model) database file (`.db`) into an R data frame. It relies on the [Oxford Economics Mdl tool](https://tools.oxfordeconomics.com/mdl/downloads.aspx) to generate a temporary `.csv` file, which is then imported into R and transformed into a format suitable for data analysis.
+
+# Setup
+
+Note that the package requires a working installation of the [Oxford Economics Global Model Workstation](https://www.oxfordeconomics.com/my-oxford/global-economic-model) and the [Oxford Economics Mdl tool](https://tools.oxfordeconomics.com/mdl/downloads.aspx). Mdl needs to be present in the system's user path variable, which is the case if Mdl has been installed using the [.msi installer package](https://tools.oxfordeconomics.com/mdl/downloads.aspx). Users may run `cmd.exe` and type `echo %PATH%` to confirm that Mdl is present in the user path variable.
+
+Once Mdl has been installed, install the R package by running these commands:
+
+```{r installation, eval=FALSE}
+library("devtools")
+install_github("stefanangrick/oemdlRtools")
+```
+
+Then load the package:
+
+```{r loading}
+library("oemdlRtools")
+```
+
+# Import data
+
+Set your working directory to the folder containing the database file you'd like to import data from via `setwd("C:/OEF")`. Then use the `read_oedb()` function to import data from a database (`.db`) file.
+
+To import real GDP and consumption data for all available countries, use the `mnemonic` parameter:
+
+```{r example01}
+ex01 <- read_oedb(db = "Jan20_1.db", mnemonic = c("GDP", "C"),
+                  start_year = 2000, end_year = 2024)
+head(ex01$dat[, 1:7])
+```
+
+To import all available data for Japan and Germany, use the `sector` parameter:
+
+```{r example02}
+ex02 <- read_oedb(db = "Jan20_1.db", sector = c("JAPAN", "GERMANY"),
+                  start_year = 2000, end_year = 2024)
+head(ex02$dat[, c(1:4, 744:746)])
+```
+
+To import real GDP and consumption data for Japan and Germany only, combine the `mnemonic` and `sector` parameters:
+
+```{r example03}
+ex03 <- read_oedb(db = "Jan20_1.db", mnemonic = c("GDP", "C"),
+                  sector = c("JAPAN", "GERMANY"),
+                  start_year = 2000, end_year = 2024)
+head(ex03$dat)
+```
+
+For more fine-grained control, use `mnemonic_sector` to specify custom mnemonic-sector combinations. To import US nominal GDP, Japan's current account relative to GDP, and South Korea's trade balance in dollar terms, create the following data frame:
+
+```{r example04a}
+mn_sec <- data.frame("Mnemonic" = c("GDP!", "BCU%", "BVI$"),
+                     "Sector" = c("US", "JAPAN", "KOREA"),
+                     stringsAsFactors = FALSE)
+mn_sec
+```
+
+Now run:
+
+```{r example04n}
+ex04 <- read_oedb(db = "Jan20_1.db", mnemonic_sector = mn_sec,
+                  start_year = 2000, end_year = 2024)
+head(ex04$dat)
+```
+
+Note that in addition to the actual data (`$dat`), the function returns fix metadata (`$fix`) and general variable information (`$var`). By default mnemonics are transformed into syntactivally valid R names using simple replacement rules. To revert the transformation, you may use the hidden function `.revert_names()`.
+
+# Import data from an industry model database
+
+To import data from an Oxford Economics [Global Industry Model](https://www.oxfordeconomics.com/my-oxford/global-industry-model) database, simply set the `model_dir` parameter to your industry model directory:
+
+```{r exampleindustry}
+exind <- read_oedb(db = "Feb1i.db", mnemonic = c("PNC", "PNR"),
+                   model_dir = "C:/OxfordGlobalIndustry",
+                   start_year = 2000, end_year = 2024)
+head(exind$dat[, 1:7])
+```
+
+# Specify locations by ISO code
+
+The package contains a function `oe_macromappings()` which can be used to convert [ISO 3-character codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) to Oxford Economic sector names and back. To get the Oxford Economics sector names for the United States, China and Australia, run:
+
+```{r macromappingsexample}
+oe_macromappings()$oesector[match(c("USA", "CHN", "AUS"), oe_macromappings()$iso3c)]
+```
+
+ISO 3-character codes can be further converted to other formats, e.g. [ISO 2-character codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2), using the [countrycodes package](https://cran.r-project.org/web/packages/countrycode/index.html).
+
+# Plot the data
+
+To plot the data using the [ggplot2](https://ggplot2.tidyverse.org/) package:
+
+```{r ggplot, fig.height=4, fig.width=8, message=FALSE, warning=FALSE, out.height=384, out.width=768}
+library("ggplot2")
+library("reshape2")
+
+plt <- ggplot(data = melt(
+  exind$dat[, c("date", "PNC_US", "PNC_JAPAN", "PNC_GERMANY")], id = "date"),
+  mapping = aes(x = date, y = value, color = variable)) +
+  geom_line(size = 1) +
+  scale_color_manual("", values = oe_palette()) +
+  labs(title = "Car production", x = "Date", y = "Thousands")
+plt
+```
+
+ggplot2 objects can be converted further to interactive [plotly](http://plot.ly/) graphs:
+
+```{r plotly, eval=FALSE}
+library("plotly")
+ggplotly(plt)
+```
