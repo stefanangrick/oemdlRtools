@@ -129,7 +129,7 @@ head(ex04$dat)
 
 Note that in addition to the actual data (`$dat`), the function returns
 fix metadata (`$fix`) and general variable information (`$var`). By
-default mnemonics are transformed into syntactivally valid R names using
+default mnemonics are transformed into syntactically valid R names using
 simple replacement rules. To revert the transformation, you may use the
 hidden function `.revert_names()`.
 

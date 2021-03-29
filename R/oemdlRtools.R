@@ -23,9 +23,15 @@
 }
 
 #' Convert Mdl date string into an R Date object
-.oe_date <- function(x) {
-  x[!is.na(x)] <- paste0(substr(x[!is.na(x)], 1, 4), "-",
-                         as.numeric(substr(x[!is.na(x)], 6, 6)) * 3 - 2, "-01")
+.oe_date <- function(x, eop_dates = FALSE) {
+  x_year  <- substr(x[!is.na(x)], 1, 4)
+  x_month <- as.numeric(substr(x[!is.na(x)], 6, 6)) * 3
+
+  if (!eop_dates) {
+    x_month <- x_month - 2
+  }
+
+  x[!is.na(x)] <- paste0(x_year, "-", x_month, "-01")
   x <- as.Date(x)
   return(x)
 }
@@ -219,6 +225,8 @@ oe_macromappings <- function() {
 #' 1980).
 #' @param end_year Numeric. The last year for which to import data (default:
 #' 2050).
+#' @param eop_dates Logical. If \code{TRUE}, dates are aligned with the final
+#' month within a quarter (default: FALSE).
 #' @param as_xts Logical. If \code{TRUE}, data is returned in xts format.
 #' @param verbose Logical. If \code{TRUE}, status messages are printed.
 #' @return A list containing the data \code{$dat}, header metadata
@@ -237,7 +245,7 @@ oe_macromappings <- function() {
 read_oedb <- function(db, mnemonic = NULL, sector = NULL,
                       mnemonic_sector = NULL, exp_type = "V",
                       model_dir = "C:/OEF", start_year = 1980, end_year = 2050,
-                      as_xts = FALSE, verbose = FALSE) {
+                      eop_dates = FALSE, as_xts = FALSE, verbose = FALSE) {
   # Check if Mdl tool is available
   if (Sys.which("mdl") == "") {
     stop("This function requires the Oxford Economics Mdl tool to run.")
@@ -246,6 +254,11 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
   # Check if database file exists
   if (!file.exists(db)) {
     stop("Database file not found.")
+  }
+
+  # Check if model directory file exists
+  if (!file.exists(model_dir)) {
+    stop("Model directory not found.")
   }
 
   # Make sure mnemonic_sector combinations are provided in correct format
@@ -270,13 +283,18 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
 
   # Print summary of function call
   if (verbose) {
-    message("Call: db: ", db, "; mnemonic: ", mnemonic, "; sector: ", sector,
+    message("Call: db: ", db,
+            "; mnemonic: ", paste(mnemonic, collapse = ", "),
+            "; sector: ", paste(sector, collapse = ", "),
             "; mnemonic_sector: ",
             ifelse(!is.null(mnemonic_sector), "Provided", ""),
             "; exp_type: ", paste0(exp_type, collapse = ", "),
             "; model_dir: ", model_dir,
-            "; start_year: ", start_year, "; end_year: ", end_year,
-            "; verbose: ", verbose, "; as_xts: ", as_xts)
+            "; start_year: ", start_year,
+            "; end_year: ", end_year,
+            "; eop_dates: ", eop_dates,
+            "; as_xts: ", as_xts,
+            "; verbose: ", verbose)
   }
 
   # Export fix metadata and read in fix metadata
@@ -301,8 +319,8 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
   fix_dat             <- fix_dat[(!is.na(fix_dat$Mnemonic)), ]
   fix_dat$Mnemonic    <- .clean_names(fix_dat$Mnemonic)
   fix_dat$Indicator   <- paste0(fix_dat$Mnemonic, "_", fix_dat$Sector)
-  fix_dat$StartPeriod <- .oe_date(fix_dat$StartPeriod)
-  fix_dat$EndPeriod   <- .oe_date(fix_dat$EndPeriod)
+  fix_dat$StartPeriod <- .oe_date(fix_dat$StartPeriod, eop_dates = eop_dates)
+  fix_dat$EndPeriod   <- .oe_date(fix_dat$EndPeriod, eop_dates = eop_dates)
 
   file.remove(fix_file)
 
@@ -326,7 +344,8 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
                                             na.strings = "")
   var_dat$Mnemonic       <- .clean_names(var_dat$Mnemonic)
   var_dat$Indicator      <- paste0(var_dat$Mnemonic, "_", var_dat$Sector)
-  var_dat$End.of.History <- .oe_date(var_dat$End.of.History)
+  var_dat$End.of.History <- .oe_date(var_dat$End.of.History,
+                                     eop_dates = eop_dates)
   var_dat$Is.percent     <- grepl(".*\\[%.*", var_dat$Description)
   if ("R" %in% exp_type) {
     var_dat$Residual.Indicator <- paste0("R_", var_dat$Indicator)
@@ -460,7 +479,7 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
   colnames(dat)[ncol(dat)] <- "date"
 
   # Save metadata separately
-  dat_head      <- dat[1:meta_end, -ncol(dat)]
+  dat_head      <- dat[1:meta_end, -ncol(dat), drop = FALSE]
   dat           <- dat[-(1:meta_end), ]
   rownames(dat) <- NULL
 
@@ -469,23 +488,23 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
                                       function(x) as.numeric(as.character(x)))
 
   # Carry forward last date value and append quarter
-  year_ticks       <- !is.na(dat[, ncol(dat)])
-  dat[, ncol(dat)] <- c(NA, dat[year_ticks, ncol(dat)])[cumsum(year_ticks) + 1]
-  dat[, ncol(dat)] <- paste0(dat[, "date"], "-",
-                             rep(c(1, 4, 7, 10), (nrow(dat) / 4)), "-", 1)
-  dat[, ncol(dat)] <- as.Date(dat[, ncol(dat)])
+  year_ticks    <- !is.na(dat[, "date"])
+  dat[, "date"] <- dat[year_ticks, "date"][cumsum(year_ticks)]
+  dat[, "date"] <- paste0(dat[, "date"], "0", rep(seq_len(4), (nrow(dat) / 4)))
+  dat[, "date"] <- .oe_date(dat[, "date"], eop_dates = eop_dates)
+  dat[, "date"] <- as.Date(dat[, "date"])
 
   # Put date column first
   dat <- dat[, c(ncol(dat), 1:(ncol(dat) - 1))]
 
   # Save type of variable
   dat_type <- trimws(dat_head[type_row, ])
-  dat_type <- stats::setNames(dat_type, nm = colnames(dat[, -1]))
+  dat_type <- stats::setNames(dat_type, nm = colnames(dat[, -1, drop = FALSE]))
 
   # Save index of last historical data point
   last_hist <- trimws(dat_head[date_row, ])
   last_hist <- replace(last_hist, last_hist == "0", NA)
-  last_hist <- .oe_date(last_hist)
+  last_hist <- .oe_date(last_hist, eop_dates = eop_dates)
   last_hist <- match(last_hist, dat$date, nomatch = NA)
   last_hist <- stats::setNames(last_hist, nm = colnames(dat[, -1]))
 
@@ -495,7 +514,7 @@ read_oedb <- function(db, mnemonic = NULL, sector = NULL,
 
   # Return xts object
   if (as_xts) {
-    dat <- xts::xts(x = dat[, -1], order.by = dat[, 1])
+    dat <- xts::xts(x = dat[, -1, drop = FALSE], order.by = dat[, 1])
   }
 
   file.remove(dat_file)

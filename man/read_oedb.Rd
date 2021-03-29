@@ -13,6 +13,7 @@ read_oedb(
   model_dir = "C:/OEF",
   start_year = 1980,
   end_year = 2050,
+  eop_dates = FALSE,
   as_xts = FALSE,
   verbose = FALSE
 )
@@ -40,6 +41,9 @@ These specify custom mnemonic-sector combinations.}
 
 \item{end_year}{Numeric. The last year for which to import data (default:
 2050).}
+
+\item{eop_dates}{Logical. If \code{TRUE}, dates are aligned with the final
+month within a quarter (default: FALSE).}
 
 \item{as_xts}{Logical. If \code{TRUE}, data is returned in xts format.}
 

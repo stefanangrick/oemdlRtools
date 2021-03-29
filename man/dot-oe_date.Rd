@@ -4,7 +4,7 @@
 \alias{.oe_date}
 \title{Convert Mdl date string into an R Date object}
 \usage{
-.oe_date(x)
+.oe_date(x, eop_dates = FALSE)
 }
 \description{
 Convert Mdl date string into an R Date object
